@@ -1,0 +1,7 @@
+## YAML Template.
+
+shapado-database:
+  connection:        "mongodb://<domain>:<port>"
+  user:               ~
+  password:           ~
+  database:           "<dbname>"

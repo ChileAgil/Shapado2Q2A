@@ -19,4 +19,4 @@ Migrate Script Shapado to Question2Answer
 * Documentar metodos de migración
 * Soportar actualizaciones parciales
 * Finalizar implementación con monolog para generar bitacora o log de migración
-* <Propuestas que lleguen por medio de issues>
+* `<Propuestas que lleguen por medio de issues>`

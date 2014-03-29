@@ -63,17 +63,17 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v2.3.9",
+            "version": "v2.3.11",
             "target-dir": "Symfony/Component/Yaml",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Yaml.git",
-                "reference": "490c1c47049aa3ffab9ed6295a7b3a0e809e8519"
+                "reference": "40cd9e201a7dfef7aeae7788f7cf1463bea891db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Yaml/zipball/490c1c47049aa3ffab9ed6295a7b3a0e809e8519",
-                "reference": "490c1c47049aa3ffab9ed6295a7b3a0e809e8519",
+                "url": "https://api.github.com/repos/symfony/Yaml/zipball/40cd9e201a7dfef7aeae7788f7cf1463bea891db",
+                "reference": "40cd9e201a7dfef7aeae7788f7cf1463bea891db",
                 "shasum": ""
             },
             "require": {
@@ -97,7 +97,9 @@
             "authors": [
                 {
                     "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
                 },
                 {
                     "name": "Symfony Community",
@@ -106,7 +108,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "http://symfony.com",
-            "time": "2013-12-28 07:46:05"
+            "time": "2014-02-25 21:36:55"
         }
     ],
     "packages-dev": [

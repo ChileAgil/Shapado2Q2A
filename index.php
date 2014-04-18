@@ -29,6 +29,47 @@ if ($config['q2a-loader']) {
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+function s2qa_vote_set($post, $userid, $vote)
+    /*
+        Actually set (application level) the $vote (-1/0/1) by $userid (with $handle and $cookieid) on $postid.
+        Handles user points, recounting and event reports as appropriate.
+    */
+{
+    require_once QA_INCLUDE_DIR . 'qa-db-points.php';
+    require_once QA_INCLUDE_DIR . 'qa-db-hotness.php';
+    require_once QA_INCLUDE_DIR . 'qa-db-votes.php';
+    require_once QA_INCLUDE_DIR . 'qa-db-post-create.php';
+    require_once QA_INCLUDE_DIR . 'qa-app-limits.php';
+
+    $vote = (int)min(1, max(-1, $vote));
+    $oldvote = (int)qa_db_uservote_get($post['postid'], $userid);
+
+    qa_db_uservote_set($post['postid'], $userid, $vote);
+    qa_db_post_recount_votes($post['postid']);
+
+    $postisanswer = ($post['basetype'] == 'A');
+
+    if ($postisanswer) {
+        qa_db_post_acount_update($post['parentid']);
+        qa_db_unupaqcount_update();
+    }
+
+    $columns = array();
+
+    if (($vote > 0) || ($oldvote > 0))
+        $columns[] = $postisanswer ? 'aupvotes' : 'qupvotes';
+
+    if (($vote < 0) || ($oldvote < 0))
+        $columns[] = $postisanswer ? 'adownvotes' : 'qdownvotes';
+
+    qa_db_points_update_ifuser($userid, $columns);
+
+    qa_db_points_update_ifuser($post['userid'], array($postisanswer ? 'avoteds' : 'qvoteds', 'upvoteds', 'downvoteds'));
+
+    if ($post['basetype'] == 'Q')
+        qa_db_hotness_update($post['postid']);
+}
+
 // Connection in MongoDB
 $conn = new MongoClient($parameters['shapado-database']['connection']);
 $dbname = $parameters['shapado-database']['database'];
@@ -114,6 +155,19 @@ foreach ($array as $question) {
     // Crea Pregunta
     $post_id = qa_post_create($type, $parentid, $title, $content, $format, $categoryid, $tags, $userid);
 
+    // Obtiene Document de votos
+    $collection3 = $db->votes;
+
+    $busqueda3 = array('voteable_id' => $question['_id']);
+
+    $regs3 = $collection3->find($busqueda3);
+    $array3 = iterator_to_array($regs3);
+    foreach ($array3 as $questionVote) {
+
+        s2qa_vote_set(array('basetype' => 'Q', 'userid' => $userid, 'postid' => $post_id, 'parentid' => 0), qa_db_user_find_by_email($usuarios[$questionVote['user_id']]['email'])[0], $questionVote['value']);
+
+    }
+
     // Obtiene Document de comentarios (Respuestas que se usaron en Shapado)
     $collection2 = $db->comments;
 
@@ -135,6 +189,19 @@ foreach ($array as $question) {
         $userid = qa_db_user_find_by_email($usuarios[$question['user_id']]['email'])[0];
 
         $id_ans = qa_post_create($type, $parentid, $title, $content, $format, $categoryid, $tags, $userid);
+
+        // Obtiene Document de votos
+        $collection4 = $db->votes;
+
+        $busqueda4 = array('voteable_id' => $question['_id']);
+
+        $regs4 = $collection4->find($busqueda4);
+        $array4 = iterator_to_array($regs4);
+        foreach ($array4 as $answerVote) {
+
+            s2qa_vote_set(array('basetype' => 'A', 'userid' => $userid, 'postid' => $id_ans, 'parentid' => $post_id), qa_db_user_find_by_email($usuarios[$answerVote['user_id']]['email'])[0], $answerVote['value']);
+
+        }
     }
     echo "<hr/>";
 }
